@@ -4,7 +4,6 @@
   <meta charset="UTF-8" />
   <title>Individual Frame Animation Test</title>
   <style>
-    /* Adjust canvas dimensions to match the requested frame size for a better fit */
     #spriteCanvas {
       border: 3px solid #6c757d;
       background-color: #f8f9fa;
@@ -16,41 +15,48 @@
 </head>
 <body>
   <h1>Individual Frame Animation Test</h1>
-  <canvas id="spriteCanvas" width="680" height="269"></canvas>
+
+  <!-- Canvas is now HALF of 1340x1936 -->
+  <canvas id="spriteCanvas" width="670" height="968"></canvas>
 
   <script>
     const canvas = document.getElementById('spriteCanvas');
     const ctx = canvas.getContext('2d');
 
-    // 1. Define the frame file names and total count
-    // You can adjust this array to include more frames like frame4.PNG, frame5.PNG, etc.
+    // Your original frame resolution
+    const ORIGINAL_WIDTH = 1340;
+    const ORIGINAL_HEIGHT = 1936;
+
+    // Desired display size (half)
+    const DISPLAY_WIDTH = ORIGINAL_WIDTH / 2;  // 670
+    const DISPLAY_HEIGHT = ORIGINAL_HEIGHT / 2; // 968
+
+    canvas.width = DISPLAY_WIDTH;
+    canvas.height = DISPLAY_HEIGHT;
+
     const FRAME_FILES = ['frame1.PNG', 'frame2.PNG', 'frame3.PNG'];
     const FRAME_COUNT = FRAME_FILES.length;
-    
-    // 2. Pre-load the Image objects
+
     const frameImages = [];
     let imagesLoadedCount = 0;
-    
-    const FRAME_FPS = 12; // Frames per second for the animation
-    
+
+    const FRAME_FPS = 12;
+
     function loadFrames() {
-      return new Promise((resolve, reject) => {
+      return new Promise((resolve) => {
         FRAME_FILES.forEach((fileName, index) => {
           const img = new Image();
           img.onload = () => {
             imagesLoadedCount++;
-            if (imagesLoadedCount === FRAME_COUNT) {
-              resolve(); // All images loaded
-            }
+            if (imagesLoadedCount === FRAME_COUNT) resolve();
           };
           img.onerror = () => {
-             // Handle load error if necessary
-             console.error(`Failed to load frame: ${fileName}`);
-             imagesLoadedCount++; 
-             if (imagesLoadedCount === FRAME_COUNT) resolve(); // Continue even with a failed image
+            console.error(`Failed to load frame: ${fileName}`);
+            imagesLoadedCount++;
+            if (imagesLoadedCount === FRAME_COUNT) resolve();
           };
           img.src = fileName;
-          frameImages[index] = img; // Store the image object in the array
+          frameImages[index] = img;
         });
       });
     }
@@ -64,48 +70,38 @@
       const delta = time - lastTime;
 
       if (delta >= msPerFrame) {
-        // Cycle to the next frame
         currentFrameIndex = (currentFrameIndex + 1) % FRAME_COUNT;
         lastTime = time;
       }
 
       ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-      const currentImage = frameImages[currentFrameIndex];
+      const img = frameImages[currentFrameIndex];
 
-      // 3. Draw the current image to fill the canvas
-      if (currentImage) {
-        // Draw the current frame, scaling it to fill the entire canvas (680x269)
-        ctx.drawImage(
-          currentImage,
-          0, // sx: Source x (we use the entire image)
-          0, // sy: Source y
-          currentImage.width, // sWidth: Source width
-          currentImage.height, // sHeight: Source height
-          0, // dx: Destination x (start at canvas top-left)
-          0, // dy: Destination y
-          canvas.width, // dWidth: Destination width (canvas width)
-          canvas.height // dHeight: Destination height (canvas height)
+      if (img) {
+        // Maintain aspect ratio while fitting inside canvas
+        const ratio = Math.min(
+          canvas.width / img.width,
+          canvas.height / img.height
         );
+
+        const drawWidth = img.width * ratio;
+        const drawHeight = img.height * ratio;
+
+        // Center the image
+        const x = (canvas.width - drawWidth) / 2;
+        const y = (canvas.height - drawHeight) / 2;
+
+        ctx.drawImage(img, x, y, drawWidth, drawHeight);
       }
 
       requestAnimationFrame(gameLoop);
     }
-    
-    // Start the process: load images, then start the loop
-    loadFrames()
-        .then(() => {
-            console.log("All frames loaded. Starting animation.");
-            // Set canvas size to the desired output size (680x269)
-            canvas.width = 680;
-            canvas.height = 269;
-            requestAnimationFrame(gameLoop);
-        })
-        .catch(error => {
-            console.error("Error loading frames:", error);
-            alert("Failed to load animation frames.");
-        });
 
+    loadFrames().then(() => {
+      console.log('All frames loaded. Starting animation.');
+      requestAnimationFrame(gameLoop);
+    });
   </script>
 </body>
 </html>
