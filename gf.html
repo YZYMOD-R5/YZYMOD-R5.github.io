@@ -50,10 +50,13 @@
     let FRAME_COUNT = 0;
     let frameImages = [];
 
-    // Animation sets loaded from external frames.json
     let animationSets = {};
 
-    // Fetch frames.json and start once ready
+    let currentFrameIndex = 0;
+    let lastTime = 0;
+    const msPerFrame = 1000 / FRAME_FPS;
+
+    // Load animation data
     fetch('frames.json')
       .then(response => response.json())
       .then(data => {
@@ -73,10 +76,26 @@
       FRAME_COUNT = FRAME_FILES.length;
       frameImages = [];
       currentFrameIndex = 0;
+      lastTime = 0; // reset timing for restart
+
+      let loadedCount = 0;
 
       FRAME_FILES.forEach((fileName, index) => {
         const img = new Image();
-        img.src = fileName;
+
+        img.onload = () => {
+          loadedCount++;
+          if (loadedCount === FRAME_COUNT) {
+            console.log(setName + " fully loaded");
+          }
+        };
+
+        img.onerror = () => {
+          console.warn("Failed to load:", fileName);
+        };
+
+        // Cache buster ensures re-click works even on same set
+        img.src = fileName + "?v=" + Date.now();
         frameImages[index] = img;
       });
     }
@@ -86,10 +105,6 @@
         loadAnimation(btn.dataset.set);
       });
     });
-
-    let currentFrameIndex = 0;
-    let lastTime = 0;
-    const msPerFrame = 1000 / FRAME_FPS;
 
     function gameLoop(time) {
       if (!lastTime) lastTime = time;
@@ -104,7 +119,6 @@
 
       const img = frameImages[currentFrameIndex];
 
-      // Since all frames are same size, stretch directly to canvas
       if (img && img.complete) {
         ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
       }
