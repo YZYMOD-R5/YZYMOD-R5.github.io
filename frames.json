@@ -1,0 +1,11 @@
+{
+  "manuscript": {
+    "frames": ["frame1.PNG", "frame2.PNG", "frame3.PNG"]
+  },
+  "wip": {
+    "frames": ["wip1.PNG", "wip2.PNG", "wip3.PNG", "wip4.PNG", "wip5.PNG", "wip6.PNG", "wip7.PNG", "wip8.PNG", "wip9.PNG", "wip10.PNG", "wip11.PNG", "wip12.PNG"]
+  },
+  "final": {
+    "frames": ["f1.PNG", "f2.PNG", "f3.PNG", "f4.PNG", "f5.PNG", "f6,PNG", "f7,PNG", "f8,PNG", "f9,PNG", "f10,PNG", "f11,PNG", "f13,PNG", "f14,PNG", "f15,PNG", "f16,PNG", "f17,PNG", "f18,PNG", "f19,PNG", "f20,PNG", "f21,PNG", "f22,PNG"]
+  }
+}
